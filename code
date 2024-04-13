@@ -8,52 +8,72 @@
 
 import timeit
 import matplotlib.pyplot as plt
-import math
 
-# Рекурсивная функция F(n)
+# Функция для вычисления факториала
+def calculate_factorial(num):
+    result = 1
+    for i in range(2, num + 1):
+        result *= i
+    return result
+
+# Рекурсивная функция для F
 def recursive_F(n):
     if n == 1:
         return 1
     else:
         return (-1)**n * (recursive_F(n-1) - 2 * recursive_G(n-1))
 
-# Рекурсивная функция G(n)
+# Рекурсивная функция для G
 def recursive_G(n):
     if n == 1:
         return 1
     else:
-        return recursive_F(n-1) / math.factorial(2*n) + recursive_G(n-1)
+        return recursive_F(n-1) / calculate_factorial(2*n) + recursive_G(n-1)
 
-# Итеративная функция F(n) и G(n)
-def iterative_F_G(n):
-    F = [0] * (n+1) # Создание списка длиной (n+1) и заполнение его 0
-    G = [0] * (n+1)
-    F[1] = 1
-    G[1] = 1
-    for i in range(2, n+1):
-        F[i] = (-1)**i * (F[i-1] - 2 * G[i-1])
-        G[i] = F[i-1] / math.factorial(2*i) + G[i-1]
-    return F[n], G[n]
+# Итеративная функция для F
+def iterative_F(n):
+    if n == 1:
+        return 1
+    F_prev = 1
+    G_prev = 1
+    for i in range(2, n + 1):
+        F_current = (-1)**i * (F_prev - 2 * G_prev)
+        F_prev = F_current
+        G_prev = iterative_G(i - 1)
+    return F_current
 
-# Определение времени выполнения для нескольких значений n
-n_values = list(range(2, 11))
-# Пустые списки для хранения времени
+# Итеративная функция для G
+def iterative_G(n):
+    if n == 1:
+        return 1
+    F_prev = 1
+    G_prev = 1
+    for i in range(2, n + 1):
+        F_current = (-1)**i * (F_prev - 2 * G_prev)
+        G_current = F_prev / calculate_factorial(2 * i) + G_prev
+        F_prev = F_current
+        G_prev = G_current
+    return G_current
+
+
+n_values = range(2, 11)
+
 recursive_times = []
 iterative_times = []
 
 for n in n_values:
     time_recursive = timeit.timeit(lambda: recursive_F(n), number=1) # Измерение времени выполнения рекурсивной функции
-    recursive_times.append(time_recursive) # Добавление времени в список
+    recursive_times.append(time_recursive)
 
-    time_iterative = timeit.timeit(lambda: iterative_F_G(n), number=1) # Измерение времени выполнения итеративной функции
-    iterative_times.append(time_iterative) # Добавление времени в список
+    time_iterative = timeit.timeit(lambda: iterative_F(n), number=1) # Измерение времени выполнения итеративной функции
+    iterative_times.append(time_iterative)
 
 # Вывод результатов времени выполнения
 print("n\t| Рекурсивное время (сек)\t| Итеративное время (сек)")
 print("-" * 50)
 
-for i in range(len(n_values)):
-    print(f"{n_values[i]}\t| {recursive_times[i]:.6f}\t\t\t| {iterative_times[i]:.6f}")
+for i, n in enumerate(n_values):
+    print(f"{n}\t| {recursive_times[i]:.6f}\t\t\t| {iterative_times[i]:.6f}")
 
 # Визуализация времени выполнения
 plt.figure(figsize=(12, 6))
@@ -65,3 +85,6 @@ plt.title('Сравнение времени выполнения рекурси
 plt.legend()
 plt.grid(True)
 plt.show()
+
+
+
