@@ -8,17 +8,12 @@
 import timeit
 import matplotlib.pyplot as plt
 
-# Кэш для хранения вычисленных значений факториалов
-factorial_cache = {0: 1, 1: 1}
-last_factorial = 1
 
 # Функция для вычисления факториала числа
+last_factorial = 1
 def dynamic_factorial(n):
     global last_factorial
-    if n in factorial_cache:
-        last_factorial = n * factorial_cache[n]
-    else:
-        last_factorial = n * last_factorial
+    last_factorial = n * last_factorial
     return last_factorial
 
 # Рекурсивная функция для вычисления факториала
@@ -36,20 +31,23 @@ def iterative_factorial(n):
     return result
 
 # Функция для вычисления значения G
-def dynamic_G(n, cache={1: 1}, step=1):
+def dynamic_G(n, cache={1: 1}):
     if n in cache:
         return cache[n]
     else:
-        result = dynamic_F(n-1, cache, -step) / (dynamic_factorial(2*n) + dynamic_G(n-1, cache, -step))
+        result = dynamic_F(n-1, cache) / (dynamic_factorial(2*n) + dynamic_G(n-1, cache))
         cache[n] = result
         return result
 
 # Функция для вычисления значения F
-def dynamic_F(n, cache={1: 1}, step=1):
+step = 1
+def dynamic_F(n, cache={1: 1}):
     if n in cache:
         return cache[n]
     else:
-        result = step * ((dynamic_F(n-1, cache, -step) - 2 * dynamic_G(n-1, cache, -step)))
+        global step
+        step *= -1
+        result = step * ((dynamic_F(n-1, cache, step) - 2 * dynamic_G(n-1, cache, step)))
         cache[n] = result
         return result
 
@@ -61,24 +59,22 @@ def score_time(func, n):
 n_values = range(2, 11)
 recursive_times = []
 iterative_times = []
-dynamic_times = []
+
 
 # Измерение времени выполнения для каждого значения n
 for n in n_values:
     recursive_times.append(score_time(recursive_factorial, n))
     iterative_times.append(score_time(iterative_factorial, n))
-    dynamic_times.append(score_time(dynamic_F, n))
-    dynamic_times.append(score_time(dynamic_G, n))
+
 
 # Вывод результатов в табличной форме
-print(f"{'n':<10}{'Рекурсивное время (мс)':<25}{'Итерационное время (мс)':<25}{'Динамическое время (мс)':<25}")
+print(f"{'n':<10}{'Рекурсивное время (мс)':<25}{'Итерационное время (мс)':<25}")
 for i, n in enumerate(n_values):
-    print(f"{n:<10}{recursive_times[i]:<25}{iterative_times[i]:<25}{dynamic_times[i]:<25}")
+    print(f"{n:<10}{recursive_times[i]:<25}{iterative_times[i]:<25}")
 
 # Построение и вывод графика результатов
 plt.plot(n_values, recursive_times, label='Рекурсивно')
 plt.plot(n_values, iterative_times, label='Итерационно')
-plt.plot(n_values, dynamic_times[::2], label='Динамическое')  # Используем только четные индексы для значений F(n)
 plt.xlabel('n')
 plt.ylabel('Время (в миллисекундах)')
 plt.legend()
