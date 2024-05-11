@@ -30,26 +30,29 @@ def iterative_factorial(n):
         result *= i
     return result
 
+last_G_value = 1;
+last_F_value = 1;
+
 # Функция для вычисления значения G
-def dynamic_G(n, cache={1: 1}):
-    if n in cache:
-        return cache[n]
+def dynamic_G(n):
+    global last_G_value, last_F_value
+    if n ==1:
+        return 1
     else:
-        result = dynamic_F(n-1, cache) / (dynamic_factorial(2*n) + dynamic_G(n-1, cache))
-        cache[n] = result
-        return result
+        last_G_value = dynamic_F(n-1) / (dynamic_factorial(2 * n) + dynamic_G(n-1))
+        return last_G_value
 
 # Функция для вычисления значения F
 step = 1
-def dynamic_F(n, cache={1: 1}):
-    if n in cache:
-        return cache[n]
+def dynamic_F(n):
+    global last_G_value, last_F_value
+    if n == 1:
+        return 1
     else:
         global step
         step *= -1
-        result = step * ((dynamic_F(n-1, cache, step) - 2 * dynamic_G(n-1, cache, step)))
-        cache[n] = result
-        return result
+        last_F_value = step * ((dynamic_F(n-1) - 2 * dynamic_G(n-1)))
+        return last_F_value
 
 # Функция для записи времени
 def score_time(func, n):
